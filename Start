@@ -1,36 +1,31 @@
 # В начале файла импортируй aiohttp:
 import aiohttp
+import requests
+import json
+import time
+import logging
+import asyncio
 
 # Создай функцию:
-
 async def fetch_get(req_url: str) -> aiohttp.ClientResponse:
     async with aiohttp.ClientSession() as session:
         async with session.get(req_url) as resp:
             return resp
 
-import requests
-import json
-
-TOKEN = "`TOKEN`"
-chat_id = "`CHAT ID`"
+TOKEN = "`TOKEN`" #Здесь надо ввести токен ТГ бота
+chat_id = "`CHAT ID`" #ID чата куда будет писать бот 
 message6 = "Выполняется запуск игрового сервера"
-url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={chat_id}&text={message6}"
+url = f"https://api.telegram.org/bot{TOKEN}/sendMessage?chat_id={chat_id}&text={message6}" #ссылка отправки сообщения ТГ API 
 print(requests.get(url).json())  # Эта строка отсылает сообщение
-
-import time
-import logging
-import asyncio
 
 from aiogram import Bot, Dispatcher, executor, types
 
 MSG = "Программировал ли ты сегодня, {}?"
-
 logging.basicConfig(level=logging.INFO)
-
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot=bot)
 
-
+#Создание комманды через "/"
 @dp.message_handler(commands=["ident"])
 async def start_handler(message: types.Message):
     user_full_name = message.from_user.full_name
@@ -41,9 +36,7 @@ async def start_handler(message: types.Message):
         await asyncio.sleep(60 * 60 * 24)
         await bot.send_message(user_id, MSG.format(user_name))
 
-        # from aiogram import types
-
-
+#Создание кнопок ТГ
 @dp.message_handler(commands="info")
 async def cmd_start(message: types.Message):
     keyboard = types.ReplyKeyboardMarkup()
@@ -55,7 +48,6 @@ async def cmd_start(message: types.Message):
     keyboard.add(button_3)
     await message.answer("Что нужно сделать?", reply_markup=keyboard)
     # from aiogram.dispatcher.filters import Text
-
 
 # Измени Обработчик сообщения "Инфо о сервере":
 @dp.message_handler(lambda message: message.text == "Инфо о сервере")
@@ -71,23 +63,17 @@ async def with_puree(message: types.Message):
     max_players = (tt[0])['max_players']
     await message.reply(f" {name}\n{addr}\nИгроков: {players} из {max_players}")
 
-
-
-
+#Отправка файла в ТГ
 from aiogram.types import InputFile
-
 path = "C:/Users/kudri/Documents/Euro Truck Simulator 2/server.log.txt"  # или "folder/filename.ext"
-
-
 @dp.message_handler(lambda message: message.text == "Чтение логов")
 async def with_puree(message: types.Message):
     await message.answer_document(InputFile(path))
 
-
+#Кнопка отправки сообщения в ТГ
 @dp.message_handler(lambda message: message.text == "Идентификатор сервера")
 async def with_puree(message: types.Message):
     await message.reply(f" Твой идентификатор 85568392928905817/101 ")
-
 
 if __name__ == "__main__":
     executor.start_polling(dp)
